@@ -61,25 +61,19 @@ self.mapeo_laboratorios = {
 
 ## Formato del Archivo de Entrada
 
-<div style="display: flex;">
 El archivo `reporte_ocupacion.xlsx` debe contener las siguientes columnas:
-    <div style="flex: 1; padding: 10px;">
-        - Periodo
-        - Día
-        - Hora
-        - Asignatura
-        - Grupo
-        - Proyecto
-    </div>
-    <div style="flex: 1; padding: 10px;">
-        - Salón
-        - Área
-        - Edificio
-        - Sede
-        - Inscritos
-        - Docente
-    </div>
-</div>
+- Periodo
+- Día
+- Hora
+- Asignatura
+- Grupo
+- Proyecto
+- Salón
+- Área
+- Edificio
+- Sede
+- Inscritos
+- Docente
 
 ## Ejecución del Script
 
