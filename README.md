@@ -10,11 +10,24 @@ Este script automatiza la generación de horarios para los laboratorios de indus
 
 Para instalar las dependencias necesarias, ejecuta:
 ```bash
-pip install pandas openpyxl
+pip install -r requirements.txt
 ```
 O en su defecto usar el archivo requirements.txt
 ```bash
-pip install -r requirements.txt
+pip install pandas openpyxl
+```
+
+## Clonar repositorio
+
+1. Abre una terminal o línea de comandos
+2. Navega al directorio donde deseas clonar el repositorio
+3. Ejecuta el siguiente comando:
+```bash
+git clone https://github.com/tu-usuario/ScheduleGenerator.git
+```
+4. Navega al directorio del proyecto:
+```bash
+cd ScheduleGenerator
 ```
 
 ## Estructura del Proyecto
@@ -48,29 +61,47 @@ self.mapeo_laboratorios = {
 
 ## Formato del Archivo de Entrada
 
+<div style="display: flex;">
 El archivo `reporte_ocupacion.xlsx` debe contener las siguientes columnas:
-- Periodo
-- Día
-- Hora
-- Asignatura
-- Grupo
-- Proyecto
-- Salón
-- Área
-- Edificio
-- Sede
-- Inscritos
-- Docente
+    <div style="flex: 1; padding: 10px;">
+        - Periodo
+        - Día
+        - Hora
+        - Asignatura
+        - Grupo
+        - Proyecto
+    </div>
+    <div style="flex: 1; padding: 10px;">
+        - Salón
+        - Área
+        - Edificio
+        - Sede
+        - Inscritos
+        - Docente
+    </div>
+</div>
 
 ## Ejecución del Script
 
-1. Asegúrate de tener el archivo `reporte_ocupacion.xlsx` en el mismo directorio que el script
-2. Ejecuta el script:
+1. Asegúrate de tener Python 3.x instalado en tu sistema
+2. Instala las dependencias necesarias:
 ```bash
-python ./generar_horarios.py
+pip install -r requirements.txt
 ```
-
-El script generará automáticamente el archivo `HORARIO_LABORATORIOS.xlsx` con el horario formateado.
+```bash
+pip install pandas openpyxl
+```
+3. Coloca el archivo `reporte_ocupacion.xlsx` en el directorio raíz del proyecto
+4. Abre una terminal o línea de comandos
+5. Navega al directorio del proyecto si no estás en él:
+```bash
+cd ScheduleGenerator
+```
+6. Ejecuta el script:
+```bash
+python generar_horarios.py
+```
+7. El script generará automáticamente el archivo `HORARIO_LABORATORIOS.xlsx` en el mismo directorio
 
 ## Características del Horario Generado
 
