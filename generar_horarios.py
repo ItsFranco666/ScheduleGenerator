@@ -2,459 +2,491 @@ import pandas as pd
 import os
 from typing import Dict, List, Tuple
 
-class LaboratoryScheduleGenerator:
+class GeneradorHorariosLaboratorio:
     def __init__(self):
         """
-        Initialize the Laboratory Schedule Generator with default configurations.
+        Inicializa el Generador de Horarios de Laboratorio con configuraciones por defecto.
         """
-        # Lab name mapping - EDIT THIS DICTIONARY to match your lab names
-        # Key: Lab name in reporte_ocupacion file
-        # Value: Lab name for output headers
-        self.lab_mapping = {
-            "LABORATORIO GEIO CAP(25)": "GEIO (321) TECHNE",
-            "SALA DE SOFTWARE DE TECNOLOGIA E INGENIERIA DE PRODUCCION A CAP(17)": "Sala de Software A - 16 EST - 416- TECHNE",
-            "SALA DE SOFTWARE DE TECNOLOGIA E NGENIERIA DE PRODUCCION B CAP(25)": "Sala de Software B - 24 EST - 417 TECHNE", # Corrected typo "NGENIERIA" if it exists
-            "LABORATORIO HAS CAP(22)": "HAS-200 (317) TECHNE",
-            "LABORATORIO FMS CAP(18)": "FMS-200 (320) TECHNE",
-            "LABORATORIO DE PROCESOS DE TRANSFORMACIÓN MECÁNICA": "LABORATORIO DE PROCESOS DE TRANSFORMACIÓN BLOQUE 1-102",
-            # Add more mappings as needed
-            # 'SOURCE_LAB_NAME': 'OUTPUT_LAB_NAME',
+        # Mapeo de nombres de laboratorios - EDITA ESTE DICCIONARIO para que coincida con tus nombres de laboratorio
+        # Clave: Nombre del laboratorio en el archivo reporte_ocupacion
+        # Valor: Nombre del laboratorio para los encabezados de salida
+        self.mapeo_laboratorios = {
+            'LABORATORIO GEIO CAP(25)': 'GEIO (321) TECHNE',
+            'SALA DE SOFTWARE DE TECNOLOGIA E INGENIERIA DE PRODUCCION A CAP(17)': 'Sala de Software A - 16 EST - 416- TECHNE',
+            'SALA DE SOFTWARE DE TECNOLOGIA E NGENIERIA DE PRODUCCION B CAP(25)': 'Sala de Software B - 24 EST - 417 TECHNE', # Corregido error tipográfico 'NGENIERIA' si existe
+            'LABORATORIO HAS CAP(22)': 'HAS-200 (317) TECHNE',
+            'LABORATORIO FMS CAP(18)': 'FMS-200 (320) TECHNE',
+            'LABORATORIO DE PROCESOS DE TRANSFORMACIÓN MECÁNICA': 'LABORATORIO DE PROCESOS DE TRANSFORMACIÓN BLOQUE 1-102'
+            # Agrega más mapeos según sea necesario
+            # 'NOMBRE_LABORATORIO_ORIGEN': 'NOMBRE_LABORATORIO_SALIDA',
         }
         
-        # Days of the week in order
-        self.days = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADOS']
+        # Días de la semana en orden
+        self.dias = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO']
         
-        # Time slots in order (6AM to 5PM)
-        self.time_slots = [
+        # Franjas horarias en orden (6AM a 10PM)
+        self.franjas_horarias = [
             '6AM-7AM', '7AM-8AM', '8AM-9AM', '9AM-10AM', '10AM-11AM',
             '11AM-12M', '12M-1PM', '1PM-2PM', '2PM-3PM', '3PM-4PM',
             '4PM-5PM', '5PM-6PM', '6PM-7PM', '7PM-8PM', '8PM-9PM', '9PM-10PM'
         ]
         
-        # Expected columns in the input file
-        self.input_columns = [
+        # Columnas esperadas en el archivo de entrada
+        self.columnas_entrada = [
             'Periodo', 'Día', 'Hora', 'Asignatura', 'Grupo', 
             'Proyecto', 'Salón', 'Área', 'Edificio', 'Sede', 
             'Inscritos', 'Docente'
         ]
 
-    def update_lab_mapping(self, new_mapping: Dict[str, str]):
+    def actualizar_mapeo_laboratorios(self, nuevo_mapeo: Dict[str, str]):
         """
-        Update the lab name mapping dictionary.
+        Actualiza el diccionario de mapeo de nombres de laboratorios.
         
         Args:
-            new_mapping: Dictionary with lab name mappings
+            nuevo_mapeo: Diccionario con los mapeos de nombres de laboratorios.
         """
-        self.lab_mapping.update(new_mapping)
-        print("Lab mapping updated successfully!")
+        self.mapeo_laboratorios.update(nuevo_mapeo)
+        print("¡Mapeo de laboratorios actualizado exitosamente!")
 
-    def read_occupation_report(self, file_path: str) -> pd.DataFrame:
+    def leer_reporte_ocupacion(self, ruta_archivo: str) -> pd.DataFrame:
         """
-        Read the occupation report Excel file.
+        Lee el archivo de Excel del reporte de ocupación.
         
         Args:
-            file_path: Path to the reporte_ocupacion.xlsx file
+            ruta_archivo: Ruta al archivo reporte_ocupacion.xlsx.
             
         Returns:
-            DataFrame with the occupation data
+            DataFrame con los datos de ocupación.
         """
         try:
-            if not os.path.exists(file_path):
-                raise FileNotFoundError(f"File not found: {file_path}")
+            if not os.path.exists(ruta_archivo):
+                raise FileNotFoundError(f"Archivo no encontrado: {ruta_archivo}")
                 
-            df = pd.read_excel(file_path)
+            df = pd.read_excel(ruta_archivo)
             
-            # Validate columns
-            if len(df.columns) != len(self.input_columns):
-                print(f"Warning: Expected {len(self.input_columns)} columns, got {len(df.columns)}")
-                print(f"Expected: {self.input_columns}")
-                print(f"Found: {list(df.columns)}")
+            # Validar columnas
+            if len(df.columns) != len(self.columnas_entrada):
+                print(f"Advertencia: Se esperaban {len(self.columnas_entrada)} columnas, pero se encontraron {len(df.columns)}")
+                print(f"Esperadas: {self.columnas_entrada}")
+                print(f"Encontradas: {list(df.columns)}")
             
-            # Rename columns to match expected names
-            df.columns = self.input_columns[:len(df.columns)]
+            # Renombrar columnas para que coincidan con los nombres esperados
+            df.columns = self.columnas_entrada[:len(df.columns)]
             
-            print(f"Successfully loaded {len(df)} records from {file_path}")
+            print(f"Se cargaron exitosamente {len(df)} registros desde {ruta_archivo}")
             return df
             
         except Exception as e:
-            raise Exception(f"Error reading occupation report: {str(e)}")
+            raise Exception(f"Error al leer el reporte de ocupación: {str(e)}")
 
-    def filter_mapped_labs(self, df: pd.DataFrame) -> pd.DataFrame:
+    def filtrar_laboratorios_mapeados(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Filter the dataframe to only include labs that are in our mapping.
+        Filtra el dataframe para incluir solo los laboratorios que están en nuestro mapeo y en el edificio TECHNE.
         
         Args:
-            df: Input dataframe
+            df: DataFrame de entrada.
             
         Returns:
-            Filtered dataframe with only mapped labs
+            DataFrame filtrado solo con los laboratorios mapeados en el edificio TECHNE.
         """
-        mapped_labs = list(self.lab_mapping.keys())
-        filtered_df = df[df['Salón'].isin(mapped_labs)].copy()
+        laboratorios_mapeados = list(self.mapeo_laboratorios.keys())
         
-        print(f"Filtered to {len(filtered_df)} records for mapped laboratories")
-        print(f"Mapped labs found: {filtered_df['Salón'].unique().tolist()}")
+        # Filtrar por mapeo de laboratorios Y edificio = 'TECHNE'
+        df_filtrado = df[
+            (df['Salón'].isin(laboratorios_mapeados)) & 
+            (df['Edificio'].str.upper() == 'TECHNE')
+        ].copy()
         
-        return filtered_df
+        print(f"Se filtraron {len(df_filtrado)} registros para los laboratorios mapeados en el edificio TECHNE")
+        print(f"Laboratorios mapeados encontrados: {df_filtrado['Salón'].unique().tolist()}")
+        
+        # Mostrar qué laboratorios fueron excluidos por el filtro de edificio
+        todos_los_labs_mapeados = df[df['Salón'].isin(laboratorios_mapeados)]
+        excluidos_por_edificio = todos_los_labs_mapeados[todos_los_labs_mapeados['Edificio'].str.upper() != 'TECHNE']
+        if not excluidos_por_edificio.empty:
+            labs_excluidos = excluidos_por_edificio['Salón'].unique().tolist()
+            print(f"Laboratorios excluidos (no están en el edificio TECHNE): {labs_excluidos}")
+        
+        return df_filtrado
 
-    def group_consecutive_hours(self, df: pd.DataFrame) -> List[Dict]:
+    def agrupar_horas_consecutivas(self, df: pd.DataFrame) -> List[Dict]:
         """
-        Group consecutive hour entries into single class sessions.
-        Also handles single-hour classes and non-consecutive classes.
+        Agrupa las entradas de horas consecutivas en sesiones de clase únicas.
+        También maneja clases de una sola hora y clases no consecutivas.
         
         Args:
-            df: Filtered dataframe
+            df: DataFrame filtrado.
             
         Returns:
-            List of class session dictionaries
+            Lista de diccionarios de sesiones de clase.
         """
-        classes = []
+        clases = []
         
-        # Group by all fields except hour
-        group_fields = ['Día', 'Asignatura', 'Grupo', 'Proyecto', 'Salón', 'Docente']
-        grouped = df.groupby(group_fields)
+        # Agrupar por todos los campos excepto la hora
+        campos_agrupacion = ['Día', 'Asignatura', 'Grupo', 'Proyecto', 'Salón', 'Docente']
+        agrupado = df.groupby(campos_agrupacion)
         
-        for group_key, group_df in grouped:
-            # Sort by hour to ensure proper consecutive ordering
-            group_df = group_df.sort_values('Hora')
-            hours = group_df['Hora'].tolist()
-            processed_hours = set()
+        for clave_grupo, df_grupo in agrupado:
+            # Ordenar por hora para asegurar un orden consecutivo adecuado
+            df_grupo = df_grupo.sort_values('Hora')
+            horas = df_grupo['Hora'].tolist()
+            horas_procesadas = set()
             
-            # Find consecutive pairs first
+            # Encontrar primero los pares consecutivos
             i = 0
-            while i < len(hours) - 1:
-                if hours[i] in processed_hours:
+            while i < len(horas) - 1:
+                if horas[i] in horas_procesadas:
                     i += 1
                     continue
                     
-                current_hour = hours[i]
-                next_hour = hours[i + 1]
+                hora_actual = horas[i]
+                hora_siguiente = horas[i + 1]
                 
-                # Check if they are consecutive
-                if self.are_consecutive_hours(current_hour, next_hour):
-                    class_info = {
-                        'day': group_key[0],
-                        'start_hour': current_hour,
-                        'end_hour': next_hour,
-                        'subject': group_key[1],
-                        'group': group_key[2],
-                        'project': group_key[3],
-                        'lab': group_key[4],
-                        'teacher': group_key[5],
-                        'is_two_hour': True
+                # Verificar si son horas consecutivas
+                if self.son_horas_consecutivas(hora_actual, hora_siguiente):
+                    info_clase = {
+                        'dia': clave_grupo[0],
+                        'hora_inicio': hora_actual,
+                        'hora_fin': hora_siguiente,
+                        'asignatura': clave_grupo[1],
+                        'grupo': clave_grupo[2],
+                        'proyecto': clave_grupo[3],
+                        'laboratorio': clave_grupo[4],
+                        'docente': clave_grupo[5],
+                        'inscritos': df_grupo.iloc[0]['Inscritos'],  # Obtener el número de inscritos
+                        'es_de_dos_horas': True
                     }
-                    classes.append(class_info)
-                    processed_hours.add(current_hour)
-                    processed_hours.add(next_hour)
-                    i += 2  # Skip the next hour as it's already processed
+                    clases.append(info_clase)
+                    horas_procesadas.add(hora_actual)
+                    horas_procesadas.add(hora_siguiente)
+                    i += 2  # Saltar la siguiente hora ya que ha sido procesada
                 else:
                     i += 1
             
-            # Handle remaining single hours or non-consecutive classes
-            for hour in hours:
-                if hour not in processed_hours:
-                    class_info = {
-                        'day': group_key[0],
-                        'start_hour': hour,
-                        'end_hour': None,
-                        'subject': group_key[1],
-                        'group': group_key[2],
-                        'project': group_key[3],
-                        'lab': group_key[4],
-                        'teacher': group_key[5],
-                        'is_two_hour': False
+            # Manejar las horas restantes (clases de una hora o no consecutivas)
+            for hora in horas:
+                if hora not in horas_procesadas:
+                    info_clase = {
+                        'dia': clave_grupo[0],
+                        'hora_inicio': hora,
+                        'hora_fin': None,
+                        'asignatura': clave_grupo[1],
+                        'grupo': clave_grupo[2],
+                        'proyecto': clave_grupo[3],
+                        'laboratorio': clave_grupo[4],
+                        'docente': clave_grupo[5],
+                        'inscritos': df_grupo[df_grupo['Hora'] == hora].iloc[0]['Inscritos'],  # Obtener inscritos para esta hora
+                        'es_de_dos_horas': False
                     }
-                    classes.append(class_info)
+                    clases.append(info_clase)
         
-        print(f"Found {len(classes)} class sessions (including single-hour classes)")
-        return classes
+        print(f"Se encontraron {len(clases)} sesiones de clase (incluyendo clases de una hora)")
+        return clases
 
-    def are_consecutive_hours(self, hour1: str, hour2: str) -> bool:
+    def son_horas_consecutivas(self, hora1: str, hora2: str) -> bool:
         """
-        Check if two hours are consecutive in our time slot sequence.
+        Verifica si dos horas son consecutivas en nuestra secuencia de franjas horarias.
         
         Args:
-            hour1: First hour
-            hour2: Second hour
+            hora1: Primera hora.
+            hora2: Segunda hora.
             
         Returns:
-            True if consecutive, False otherwise
+            True si son consecutivas, False en caso contrario.
         """
         try:
-            idx1 = self.time_slots.index(hour1)
-            idx2 = self.time_slots.index(hour2)
+            idx1 = self.franjas_horarias.index(hora1)
+            idx2 = self.franjas_horarias.index(hora2)
             return idx2 == idx1 + 1
         except ValueError:
             return False
 
-    def create_schedule_matrix(self, classes: List[Dict]) -> pd.DataFrame:
+    def crear_matriz_horario(self, clases: List[Dict]) -> pd.DataFrame:
         """
-        Create the output schedule matrix with the exact template structure.
+        Crea la matriz de horario de salida con la estructura exacta de la plantilla.
         
         Args:
-            classes: List of class session dictionaries
+            clases: Lista de diccionarios de sesiones de clase.
             
         Returns:
-            DataFrame with the schedule matrix
+            DataFrame con la matriz del horario.
         """
-        # Get unique labs from our mapping (output names)
-        output_labs = list(set(self.lab_mapping.values()))
-        output_labs.sort()  # Sort for consistent ordering
+        # Obtener laboratorios únicos de nuestro mapeo (nombres de salida)
+        laboratorios_salida = sorted(list(set(self.mapeo_laboratorios.values())))
         
-        # Create columns: Dia, Hora, then triplets for each lab (Subject, Group, Teacher/Project)
-        columns = ['Dia', 'Hora']
-        for lab in output_labs:
-            columns.extend([f"{lab}_subject", f"{lab}_group", f"{lab}_teacher_project"])
+        # Crear columnas: Dia, Hora, luego pares para cada laboratorio (Asignatura, Grupo)
+        columnas = ['Dia', 'Hora']
+        for lab in laboratorios_salida:
+            columnas.extend([f"{lab}_asignatura", f"{lab}_grupo"])
         
-        # Create rows for each day and time slot, plus separation rows
-        rows = []
-        for day_idx, day in enumerate(self.days):
-            for time_slot in self.time_slots:
-                row = {'Dia': day, 'Hora': time_slot}
-                # Initialize all lab columns as empty
-                for lab in output_labs:
-                    row[f"{lab}_subject"] = ''
-                    row[f"{lab}_group"] = ''
-                    row[f"{lab}_teacher_project"] = ''
-                rows.append(row)
+        # Crear filas para cada día y franja horaria, más filas de separación
+        filas = []
+        for i, dia in enumerate(self.dias):
+            for franja in self.franjas_horarias:
+                fila = {'Dia': dia, 'Hora': franja}
+                # Inicializar todas las columnas de laboratorio como vacías
+                for lab in laboratorios_salida:
+                    fila[f"{lab}_asignatura"] = ''
+                    fila[f"{lab}_grupo"] = ''
+                filas.append(fila)
             
-            # Add separation row after each day (except the last one)
-            if day_idx < len(self.days) - 1:
-                separator_row = {'Dia': '', 'Hora': ''}
-                for lab in output_labs:
-                    separator_row[f"{lab}_subject"] = ''
-                    separator_row[f"{lab}_group"] = ''
-                    separator_row[f"{lab}_teacher_project"] = ''
-                rows.append(separator_row)
+            # Añadir fila de separación después de cada día (excepto el último)
+            if i < len(self.dias) - 1:
+                fila_separadora = {'Dia': '', 'Hora': ''}
+                for lab in laboratorios_salida:
+                    fila_separadora[f"{lab}_asignatura"] = ''
+                    fila_separadora[f"{lab}_grupo"] = ''
+                filas.append(fila_separadora)
         
-        # Create the base dataframe
-        schedule_df = pd.DataFrame(rows, columns=columns)
+        # Crear el dataframe base
+        df_horario = pd.DataFrame(filas, columns=columnas)
         
-        # Fill in the class information
-        for class_info in classes:
-            day = class_info['day']
-            start_hour = class_info['start_hour']
+        # Rellenar la información de las clases
+        for info_clase in clases:
+            dia = info_clase['dia']
+            hora_inicio = info_clase['hora_inicio']
             
-            # Map lab name to output name
-            output_lab = self.lab_mapping.get(class_info['lab'])
-            if not output_lab:
+            # Mapear nombre de laboratorio a nombre de salida
+            laboratorio_salida = self.mapeo_laboratorios.get(info_clase['laboratorio'])
+            if not laboratorio_salida:
                 continue
             
-            if class_info['is_two_hour']:
-                # Two-hour class: traditional format
-                end_hour = class_info['end_hour']
+            # Crear grupo con información de inscritos
+            grupo_con_inscritos = f"{info_clase['grupo']} | {info_clase['inscritos']}"
+            
+            if info_clase['es_de_dos_horas']:
+                # Clase de dos horas: formato tradicional
+                hora_fin = info_clase['hora_fin']
                 
-                # First hour: Subject in first column, Group in second column
-                start_mask = (schedule_df['Dia'] == day) & (schedule_df['Hora'] == start_hour)
-                if start_mask.any():
-                    idx = schedule_df[start_mask].index[0]
-                    schedule_df.loc[idx, f"{output_lab}_subject"] = class_info['subject']
-                    schedule_df.loc[idx, f"{output_lab}_group"] = class_info['group']
+                # Primera hora: Asignatura en la primera columna, Grupo con inscritos en la segunda
+                mascara_inicio = (df_horario['Dia'] == dia) & (df_horario['Hora'] == hora_inicio)
+                if mascara_inicio.any():
+                    idx = df_horario[mascara_inicio].index[0]
+                    df_horario.loc[idx, f"{laboratorio_salida}_asignatura"] = info_clase['asignatura']
+                    df_horario.loc[idx, f"{laboratorio_salida}_grupo"] = grupo_con_inscritos
                 
-                # Second hour: Teacher in first column, Project in second column
-                end_mask = (schedule_df['Dia'] == day) & (schedule_df['Hora'] == end_hour)
-                if end_mask.any():
-                    idx = schedule_df[end_mask].index[0]
-                    schedule_df.loc[idx, f"{output_lab}_subject"] = class_info['teacher']
-                    schedule_df.loc[idx, f"{output_lab}_group"] = class_info['project']
+                # Segunda hora: Docente en la primera columna, Proyecto en la segunda
+                mascara_fin = (df_horario['Dia'] == dia) & (df_horario['Hora'] == hora_fin)
+                if mascara_fin.any():
+                    idx = df_horario[mascara_fin].index[0]
+                    df_horario.loc[idx, f"{laboratorio_salida}_asignatura"] = info_clase['docente']
+                    df_horario.loc[idx, f"{laboratorio_salida}_grupo"] = info_clase['proyecto']
             else:
-                # Single-hour class: put all info in one row
-                start_mask = (schedule_df['Dia'] == day) & (schedule_df['Hora'] == start_hour)
-                if start_mask.any():
-                    idx = schedule_df[start_mask].index[0]
-                    schedule_df.loc[idx, f"{output_lab}_subject"] = class_info['subject']
-                    schedule_df.loc[idx, f"{output_lab}_group"] = class_info['group']
-                    schedule_df.loc[idx, f"{output_lab}_teacher_project"] = f"{class_info['teacher']} | {class_info['project']}"
+                # Clase de una hora: poner asignatura y grupo en la primera fila
+                mascara_inicio = (df_horario['Dia'] == dia) & (df_horario['Hora'] == hora_inicio)
+                if mascara_inicio.any():
+                    idx = df_horario[mascara_inicio].index[0]
+                    df_horario.loc[idx, f"{laboratorio_salida}_asignatura"] = info_clase['asignatura']
+                    df_horario.loc[idx, f"{laboratorio_salida}_grupo"] = grupo_con_inscritos
         
-        return schedule_df
+        return df_horario
 
-    def format_output_headers(self, df: pd.DataFrame) -> pd.DataFrame:
+    def formatear_encabezados_salida(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, List[str]]:
         """
-        Format the output headers to match the template structure.
+        Formatea los encabezados de salida para que coincidan con la estructura de la plantilla.
         
         Args:
-            df: Schedule dataframe
+            df: DataFrame del horario.
             
         Returns:
-            DataFrame with properly formatted headers
+            Un tuple con el DataFrame con encabezados formateados y la lista de nombres de laboratorios.
         """
-        # Create a copy to avoid modifying the original
-        output_df = df.copy()
+        # Crear una copia para evitar modificar el original
+        df_salida = df.copy()
         
-        # Create new column names for better readability
-        new_columns = []
-        lab_names = []
+        # Crear nuevos nombres de columna para mayor legibilidad
+        nuevas_columnas = []
+        nombres_laboratorios = []
         
-        for col in output_df.columns:
+        for col in df_salida.columns:
             if col in ['Dia', 'Hora']:
-                new_columns.append(col)
-            elif col.endswith('_subject'):
-                lab_name = col.replace('_subject', '')
-                new_columns.append(f"{lab_name} - Asignatura")
-                if lab_name not in lab_names:
-                    lab_names.append(lab_name)
-            elif col.endswith('_group'):
-                lab_name = col.replace('_group', '')
-                new_columns.append(f"{lab_name} - Grupo")
-            elif col.endswith('_teacher_project'):
-                lab_name = col.replace('_teacher_project', '')
-                new_columns.append(f"{lab_name} - Docente/Proyecto")
+                nuevas_columnas.append(col)
+            elif col.endswith('_asignatura'):
+                nombre_lab = col.replace('_asignatura', '')
+                nuevas_columnas.append(f"{nombre_lab} - Asignatura")
+                if nombre_lab not in nombres_laboratorios:
+                    nombres_laboratorios.append(nombre_lab)
+            elif col.endswith('_grupo'):
+                nombre_lab = col.replace('_grupo', '')
+                nuevas_columnas.append(f"{nombre_lab} - Grupo")
         
-        output_df.columns = new_columns
+        df_salida.columns = nuevas_columnas
         
-        return output_df, lab_names
+        return df_salida, nombres_laboratorios
 
-    def save_schedule(self, df: pd.DataFrame, output_path: str):
+    def guardar_horario(self, df: pd.DataFrame, ruta_salida: str):
         """
-        Save the schedule to an Excel file with proper formatting and day separations.
+        Guarda el horario en un archivo de Excel con formato adecuado, separaciones por día y colores alternos.
         
         Args:
-            df: Schedule dataframe
-            output_path: Output file path
+            df: DataFrame del horario.
+            ruta_salida: Ruta del archivo de salida.
         """
         try:
             from openpyxl import Workbook
             from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
             from openpyxl.utils.dataframe import dataframe_to_rows
             
-            # Create workbook and worksheet
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "Horario Laboratorios"
+            # Crear libro y hoja de trabajo
+            libro = Workbook()
+            hoja = libro.active
+            hoja.title = "Horario Laboratorios"
             
-            # Write the dataframe to the worksheet
+            # Escribir el dataframe en la hoja de trabajo
             for r in dataframe_to_rows(df, index=False, header=True):
-                ws.append(r)
+                hoja.append(r)
             
-            # Format headers
-            header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-            header_font = Font(color="FFFFFF", bold=True)
+            # Definir colores y estilos
+            relleno_encabezado = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+            fuente_encabezado = Font(color="FFFFFF", bold=True)
+            relleno_separador = PatternFill(start_color="E6E6E6", end_color="E6E6E6", fill_type="solid")
             
-            for col in range(1, ws.max_column + 1):
-                cell = ws.cell(row=1, column=col)
-                cell.fill = header_fill
-                cell.font = header_font
-                cell.alignment = Alignment(horizontal="center", vertical="center")
+            # Colores alternos para pares de filas (verde y azul)
+            relleno_verde = PatternFill(start_color="E8F5E8", end_color="E8F5E8", fill_type="solid")  # Verde claro
+            relleno_azul = PatternFill(start_color="E8F0FF", end_color="E8F0FF", fill_type="solid")   # Azul claro
             
-            # Format day separation rows (empty rows between days)
-            separator_fill = PatternFill(start_color="E6E6E6", end_color="E6E6E6", fill_type="solid")
+            # Formatear encabezados
+            for col in range(1, hoja.max_column + 1):
+                celda = hoja.cell(row=1, column=col)
+                celda.fill = relleno_encabezado
+                celda.font = fuente_encabezado
+                celda.alignment = Alignment(horizontal="center", vertical="center")
             
-            for row in range(2, ws.max_row + 1):
-                # Check if this is a separator row (empty Dia and Hora)
-                if not ws.cell(row=row, column=1).value and not ws.cell(row=row, column=2).value:
-                    for col in range(1, ws.max_column + 1):
-                        ws.cell(row=row, column=col).fill = separator_fill
+            # Aplicar colores alternos a pares de filas y manejar separadores
+            for fila_num in range(2, hoja.max_row + 1):
+                # Comprobar si es una fila separadora (Dia y Hora vacíos)
+                celda_dia = hoja.cell(row=fila_num, column=1)
+                celda_hora = hoja.cell(row=fila_num, column=2)
+                
+                if not celda_dia.value and not celda_hora.value:
+                    # Es una fila separadora
+                    for col in range(1, hoja.max_column + 1):
+                        hoja.cell(row=fila_num, column=col).fill = relleno_separador
+                else:
+                    # Es una fila de datos normal
+                    franja_horaria = celda_hora.value
+                    
+                    if franja_horaria in self.franjas_horarias:
+                        indice_tiempo = self.franjas_horarias.index(franja_horaria)
+                        indice_par = indice_tiempo // 2  # División entera para obtener el número de par
+                        
+                        # Alternar colores para cada par
+                        color_relleno = relleno_verde if indice_par % 2 == 0 else relleno_azul
+                        
+                        for col in range(1, hoja.max_column + 1):
+                            hoja.cell(row=fila_num, column=col).fill = color_relleno
             
-            # Add borders to all cells
-            thin_border = Border(
+            # Añadir bordes a todas las celdas
+            borde_fino = Border(
                 left=Side(style='thin'),
                 right=Side(style='thin'),
                 top=Side(style='thin'),
                 bottom=Side(style='thin')
             )
             
-            for row in range(1, ws.max_row + 1):
-                for col in range(1, ws.max_column + 1):
-                    ws.cell(row=row, column=col).border = thin_border
-                    ws.cell(row=row, column=col).alignment = Alignment(
+            for fila in range(1, hoja.max_row + 1):
+                for col in range(1, hoja.max_column + 1):
+                    celda = hoja.cell(row=fila, column=col)
+                    celda.border = borde_fino
+                    celda.alignment = Alignment(
                         horizontal="center", 
                         vertical="center",
                         wrap_text=True
                     )
             
-            # Auto-adjust column widths
-            for column in ws.columns:
-                max_length = 0
-                column_letter = column[0].column_letter
-                for cell in column:
+            # Autoajustar anchos de columna
+            for columna in hoja.columns:
+                longitud_maxima = 0
+                letra_columna = columna[0].column_letter
+                for celda in columna:
                     try:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(str(cell.value))
+                        if len(str(celda.value)) > longitud_maxima:
+                            longitud_maxima = len(str(celda.value))
                     except:
                         pass
-                adjusted_width = min(max_length + 2, 50)  # Cap at 50 characters
-                ws.column_dimensions[column_letter].width = adjusted_width
+                ancho_ajustado = min(longitud_maxima + 2, 50)  # Limitar a 50 caracteres
+                hoja.column_dimensions[letra_columna].width = ancho_ajustado
             
-            # Save the workbook
-            wb.save(output_path)
+            # Guardar el libro de trabajo
+            libro.save(ruta_salida)
             
-            print(f"Schedule saved successfully to: {output_path}")
+            print(f"Horario guardado exitosamente en: {ruta_salida}")
             
         except Exception as e:
-            # Fallback to basic pandas save if openpyxl formatting fails
-            print(f"Advanced formatting failed, saving basic version: {str(e)}")
-            df.to_excel(output_path, index=False, sheet_name='Horario')
-            print(f"Basic schedule saved to: {output_path}")
+            # Opción de respaldo: guardado básico con pandas si falla el formato con openpyxl
+            print(f"Falló el formato avanzado, guardando versión básica: {str(e)}")
+            df.to_excel(ruta_salida, index=False, sheet_name='Horario')
+            print(f"Horario básico guardado en: {ruta_salida}")
 
-    def generate_schedule(self, input_file: str, output_file: str):
+    def generar_horario(self, archivo_entrada: str, archivo_salida: str):
         """
-        Main method to generate the complete schedule.
+        Método principal para generar el horario completo.
         
         Args:
-            input_file: Path to reporte_ocupacion.xlsx
-            output_file: Path for output HORARIO_LABORATORIOS.xlsx
+            archivo_entrada: Ruta a reporte_ocupacion.xlsx.
+            archivo_salida: Ruta para el archivo de salida HORARIO_LABORATORIOS.xlsx.
         """
-        print("Starting laboratory schedule generation...")
-        print(f"Input file: {input_file}")
-        print(f"Output file: {output_file}")
-        print(f"Lab mappings: {self.lab_mapping}")
+        print("Iniciando la generación de horarios de laboratorio...")
+        print(f"Archivo de entrada: {archivo_entrada}")
+        print(f"Archivo de salida: {archivo_salida}")
+        print(f"Mapeos de laboratorio: {self.mapeo_laboratorios}")
         
         try:
-            # Step 1: Read the occupation report
-            df = self.read_occupation_report(input_file)
+            # Paso 1: Leer el reporte de ocupación
+            df = self.leer_reporte_ocupacion(archivo_entrada)
             
-            # Step 2: Filter for mapped laboratories
-            filtered_df = self.filter_mapped_labs(df)
+            # Paso 2: Filtrar por laboratorios mapeados
+            df_filtrado = self.filtrar_laboratorios_mapeados(df)
             
-            if filtered_df.empty:
-                print("Warning: No data found for mapped laboratories!")
+            if df_filtrado.empty:
+                print("Advertencia: ¡No se encontraron datos para los laboratorios mapeados!")
                 return
             
-            # Step 3: Group consecutive hours into classes
-            classes = self.group_consecutive_hours(filtered_df)
+            # Paso 3: Agrupar horas consecutivas en clases
+            clases = self.agrupar_horas_consecutivas(df_filtrado)
             
-            if not classes:
-                print("Warning: No complete class sessions found!")
+            if not clases:
+                print("Advertencia: ¡No se encontraron sesiones de clase completas!")
                 return
             
-            # Step 4: Create the schedule matrix
-            schedule_df = self.create_schedule_matrix(classes)
+            # Paso 4: Crear la matriz del horario
+            df_horario = self.crear_matriz_horario(clases)
             
-            # Step 5: Format headers
-            formatted_df, lab_names = self.format_output_headers(schedule_df)
+            # Paso 5: Formatear encabezados
+            df_formateado, _ = self.formatear_encabezados_salida(df_horario)
             
-            # Step 6: Save the output
-            self.save_schedule(formatted_df, output_file)
+            # Paso 6: Guardar la salida
+            self.guardar_horario(df_formateado, archivo_salida)
             
-            print("Laboratory schedule generation completed successfully!")
+            print("¡La generación de horarios de laboratorio se completó exitosamente!")
             
         except Exception as e:
-            print(f"Error during schedule generation: {str(e)}")
+            print(f"Error durante la generación del horario: {str(e)}")
             raise
 
-def main():
+def principal():
     """
-    Example usage of the Laboratory Schedule Generator
+    Ejemplo de uso del Generador de Horarios de Laboratorio.
     """
-    # Create the generator instance
-    generator = LaboratoryScheduleGenerator()
+    # Crear la instancia del generador
+    generador = GeneradorHorariosLaboratorio()
     
-    # Optional: Update lab mappings if needed
-    additional_mappings = {
-        # 'NEW_SOURCE_LAB': 'NEW_OUTPUT_LAB',
+    # Opcional: Actualizar mapeos de laboratorios si es necesario
+    mapeos_adicionales = {
+        # 'NUEVO_LABORATORIO_ORIGEN': 'NUEVO_LABORATORIO_SALIDA',
     }
-    if additional_mappings:
-        generator.update_lab_mapping(additional_mappings)
+    if mapeos_adicionales:
+        generador.actualizar_mapeo_laboratorios(mapeos_adicionales)
     
-    # File paths
-    input_file = "reporte_ocupacion.xlsx"
-    output_file = "HORARIO_LABORATORIOS.xlsx"
+    # Rutas de los archivos
+    archivo_entrada = "reporte_ocupacion.xlsx"
+    archivo_salida = "HORARIO_LABORATORIOS.xlsx"
     
-    # Generate the schedule
+    # Generar el horario
     try:
-        generator.generate_schedule(input_file, output_file)
+        generador.generar_horario(archivo_entrada, archivo_salida)
     except Exception as e:
-        print(f"Failed to generate schedule: {str(e)}")
+        print(f"Falló la generación del horario: {str(e)}")
 
 if __name__ == "__main__":
-    main()
+    principal()
